@@ -8,5 +8,9 @@
     "start": "node index.js"
   },
   "author": "Idan Bachar",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.6.3",
+    "dotenv": "^16.3.1"
+  }
 }
