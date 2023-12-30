@@ -1,4 +1,4 @@
-# Steam Stalk Launcher
+# Steam Games Stalker
 
 The **Steam Stalk Launcher** is a Node.js and TypeScript project designed to enhance your gaming experience on Steam. Leveraging the Steam API and environment variables, this tool allows you to monitor the gaming activities of your selected friends and automatically launch your preferred game when they are playing like a REAL stalker.
 
