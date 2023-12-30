@@ -13,7 +13,7 @@ The **Steam Stalk Launcher** is a Node.js and TypeScript project designed to enh
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/idanbachar/steam-stalk-launcher.git
+   git clone https://github.com/idanbachar/steam-games-stalker.git
    ```
 
 2. Install dependencies:
