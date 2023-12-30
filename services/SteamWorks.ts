@@ -1,5 +1,9 @@
 import axios from "axios";
-import { ISteamFriend, ISteamPlayerResult } from "../interfaces/ISteam";
+import {
+  ISteamFriend,
+  ISteamGame,
+  ISteamPlayerResult,
+} from "../interfaces/ISteam";
 
 const STEAM_API_PATH = "http://api.steampowered.com";
 const PLAYER_SUMMARIES_PATH = `${STEAM_API_PATH}/ISteamUser/GetPlayerSummaries/v0002`;
@@ -36,7 +40,15 @@ export const checkOnlineStatus = async (apiKey: string, steamId: string) => {
   }
 };
 
-export const getCurrentPlayingGame = async (
+const getGameInfo = async (apiKey: string, gameid?: string) => {
+  if (!gameid)
+    return new Promise((resolve, reject) => {
+      resolve(undefined);
+    });
+  return await axios.get(`${GAME_SCHEMA_PATH}/?key=${apiKey}&appid=${gameid}`);
+};
+
+export const getCurrentPlayingGames = async (
   apiKey: string,
   steamids: string
 ) => {
@@ -45,20 +57,15 @@ export const getCurrentPlayingGame = async (
       `${PLAYER_SUMMARIES_PATH}/?key=${apiKey}&steamids=${steamids}`
     );
     const players = response.data.response.players as ISteamPlayerResult[];
-    for (let i = 0; i < players.length; i++) {
-      if (players[i].gameid) {
-        const gameInfo = await axios.get(
-          `${GAME_SCHEMA_PATH}/?key=${apiKey}&appid=${players[i].gameid}`
-        );
-        const gameName = gameInfo.data.game.gameName;
-        console.log(
-          `${players[i].personaname} is currently playing ${gameName}`
-        );
-        return gameName;
-      } else {
-        console.log(`${players[i].personaname} is not currently in-game`);
-      }
-    }
+    const promises = players.map((player) => {
+      return getGameInfo(apiKey, player.gameid);
+    });
+    const results = await Promise.all(promises);
+    const currentPlayingGames = results
+      .filter((result) => result !== undefined)
+      .map((game: any) => (game.data as ISteamGame).game.gameName);
+
+    return currentPlayingGames;
   } catch (error) {
     console.error("Error fetching current playing game:", error);
   }

@@ -23,3 +23,11 @@ export interface ISteamFriend {
   relationship: string;
   friend_since: number;
 }
+
+export interface ISteamGame {
+  game: {
+    gameName: string;
+    gameVersion: string;
+    availableGameStats: { stats: []; achievements: [] };
+  };
+}
