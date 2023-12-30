@@ -26,10 +26,6 @@ The **Steam Stalk Launcher** is a Node.js and TypeScript project designed to enh
 
 3. Configure environment variables in the `.env` file.
 
-   ```
-
-   ```
-
 4. Build the project:
 
    ```bash
