@@ -19,7 +19,7 @@ The **Steam Stalk Launcher** is a Node.js and TypeScript project designed to enh
 2. Install dependencies:
 
    ```bash
-   cd steam-stalk-launcher
+   cd steam-games-stalker
    npm install
 
    ```
