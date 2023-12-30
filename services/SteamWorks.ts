@@ -10,7 +10,7 @@ const PLAYER_SUMMARIES_PATH = `${STEAM_API_PATH}/ISteamUser/GetPlayerSummaries/v
 const FRIENDLIST_PATH = `${STEAM_API_PATH}/ISteamUser/GetFriendList/v0001`;
 const GAME_SCHEMA_PATH = `${STEAM_API_PATH}/ISteamUserStats/GetSchemaForGame/v2`;
 
-export const getFriendsList = async (apiKey: string, steamId: string) => {
+const getFriendsList = async (apiKey: string, steamId: string) => {
   try {
     const response = await axios.get(
       `${FRIENDLIST_PATH}/?key=${apiKey}&steamid=${steamId}&relationship=friend`
@@ -22,7 +22,7 @@ export const getFriendsList = async (apiKey: string, steamId: string) => {
   }
 };
 
-export const checkOnlineStatus = async (apiKey: string, steamId: string) => {
+const checkOnlineStatus = async (apiKey: string, steamId: string) => {
   try {
     const friendsList = await getFriendsList(apiKey, steamId);
     for (const friend of friendsList) {
@@ -48,10 +48,32 @@ const getGameInfo = async (apiKey: string, gameid?: string) => {
   return await axios.get(`${GAME_SCHEMA_PATH}/?key=${apiKey}&appid=${gameid}`);
 };
 
-export const getCurrentPlayingGames = async (
+export const IsPlayingStalkedGame = async (
   apiKey: string,
-  steamids: string
+  steamids: string,
+  gameToLaunch: string
 ) => {
+  const currentPlayingGames = await getCurrentPlayingGames(apiKey, steamids);
+  if (currentPlayingGames !== undefined) {
+    if (currentPlayingGames.includes(gameToLaunch)) {
+      return true;
+    }
+  }
+  return false;
+};
+
+export const CheckPlayingAGame = async (
+  apiKey: string,
+  yourSteamId: string
+) => {
+  const response = await axios.get(
+    `${PLAYER_SUMMARIES_PATH}/?key=${apiKey}&steamids=${yourSteamId}`
+  );
+  const players = response.data.response.players as ISteamPlayerResult[];
+  return players[0].gameid !== undefined;
+};
+
+const getCurrentPlayingGames = async (apiKey: string, steamids: string) => {
   try {
     const response = await axios.get(
       `${PLAYER_SUMMARIES_PATH}/?key=${apiKey}&steamids=${steamids}`

@@ -1,39 +1,54 @@
 import dotenv from "dotenv";
 import { exec } from "child_process";
-import { getCurrentPlayingGames } from "../services/SteamWorks";
+import {
+  CheckPlayingAGame,
+  IsPlayingStalkedGame,
+} from "../services/SteamWorks";
+import { Games } from "../services/GameObject";
 dotenv.config();
 
 const apiKey = process.env.STEAM_API_KEY;
-const steamId = process.env.STEAM_ID;
+const mySteamId = process.env.MY_STEAM_ID;
 const friendsIds = process.env.FRIENDS_IDS;
-const steamAppId = "2073850";
-const steamPath = "C:\\Program Files (x86)\\Steam\\Steam.exe";
-const command = `"${steamPath}" -applaunch ${steamAppId}`;
-const gameNameToLaunch = "The Finals";
+const steamPath = process.env.STEAM_PATH;
 
-const init = () => {
-  const interval = setInterval(() => {
-    (async () => {
-      const currentPlayingGames = await getCurrentPlayingGames(
-        apiKey!,
-        friendsIds!
-      );
-      if (currentPlayingGames !== undefined) {
-        if (currentPlayingGames.includes(gameNameToLaunch)) {
-          exec(command, (error) => {
-            if (error) {
-              console.error(`Error launching Steam game: ${error}`);
-              return;
-            }
-            console.log(`Steam game launched successfully`);
-            return () => {
-              clearInterval(interval);
-            };
-          });
-        }
+const GAME_TO_LAUNCH = "The Finals";
+const command = `"${steamPath}" -applaunch ${Games[GAME_TO_LAUNCH]}`;
+
+let amIPlayingAGame = false;
+let isPlayingStalkedGame = false;
+
+const StalkFriends = async () => {
+  do {
+    isPlayingStalkedGame = await IsPlayingStalkedGame(
+      apiKey!,
+      friendsIds!,
+      GAME_TO_LAUNCH
+    );
+    console.log("Checking for friends who playing", GAME_TO_LAUNCH);
+  } while (!isPlayingStalkedGame && !amIPlayingAGame);
+  if (!amIPlayingAGame) {
+    amIPlayingAGame = true;
+    exec(command, (error) => {
+      if (error) {
+        console.error(`Error launching Steam game: ${error}`);
+        return;
       }
-    })();
-  }, 1000);
+      console.log(`${GAME_TO_LAUNCH} game launched successfully`);
+      amIPlayingAGame = true;
+    });
+  }
 };
 
-init();
+const init = async () => {
+  do {
+    amIPlayingAGame = await CheckPlayingAGame(apiKey!, mySteamId!);
+    await StalkFriends();
+  } while (!amIPlayingAGame);
+};
+
+(async () => {
+  while (true) {
+    await init();
+  }
+})();
